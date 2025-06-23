@@ -19,7 +19,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-API_KEY = "y9Ao90AFe2koxD4Mcsq5"
+API_KEY = "KnQTGqjy5eIM03xQ4VoA"
 replacer = WallFloorReplacer(api_key=API_KEY)
 
 def save_upload_file(upload_file: UploadFile) -> str:
