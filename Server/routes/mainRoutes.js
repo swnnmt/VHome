@@ -1,7 +1,7 @@
 const express = require('express');
 const mainRouter = express.Router();
 const { createBrand, getBrandDetails, getAllBrands, addPaintAndTileToBrand } = require('../controllers/brandController');
-const { createDesign, getDesignsByUserId, updateDesignById } = require('../controllers/designController');
+const { createDesign, getDesignsByUserId, updateDesignById, deleteDesignById } = require('../controllers/designController');
 const upload = require('../middlewares/multerConfig'); 
 
 mainRouter.post('/brands', createBrand);
@@ -13,4 +13,5 @@ mainRouter.put('/brands/:brandId/add-items', addPaintAndTileToBrand);
 mainRouter.post('/designs', upload, createDesign);
 mainRouter.get('/designs/user/:id_user', getDesignsByUserId);
 mainRouter.put('/designs/:id_design',upload,updateDesignById);
+mainRouter.delete('/delete-design/:id_design', deleteDesignById);
 module.exports = mainRouter;

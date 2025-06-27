@@ -116,9 +116,41 @@ const updateDesignById = async (req, res) => {
   }
 };
 
-module.exports = { updateDesignById };
+const deleteDesignById = async (req, res) => {
+  try {
+    const { id_design } = req.params;
+
+    // Tìm thiết kế theo ID
+    const design = await Design.findById(id_design);
+    if (!design) {
+      return res.status(404).json({ message: 'Thiết kế không tồn tại.' });
+    }
+
+    // Xóa file ảnh gốc nếu tồn tại
+    const originalImagePath = path.join(__dirname, '../public', design.originalImage);
+    if (fs.existsSync(originalImagePath)) {
+      fs.unlinkSync(originalImagePath);
+    }
+
+    // Xóa file ảnh đã thiết kế nếu tồn tại
+    const designedImagePath = path.join(__dirname, '../public', design.designedImage);
+    if (fs.existsSync(designedImagePath)) {
+      fs.unlinkSync(designedImagePath);
+    }
+
+    // Xóa bản ghi trong MongoDB
+    await Design.findByIdAndDelete(id_design);
+
+    res.status(200).json({ message: 'Xóa thiết kế thành công.' });
+  } catch (error) {
+    console.error('Lỗi khi xóa thiết kế:', error);
+    res.status(500).json({ message: 'Đã xảy ra lỗi server.' });
+  }
+};
+
 
 
 
 module.exports = { createDesign,
-  getDesignsByUserId, updateDesignById };
+  getDesignsByUserId, updateDesignById, deleteDesignById };
+

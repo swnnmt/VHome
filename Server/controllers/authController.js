@@ -15,14 +15,15 @@ exports.signup = async (req, res) => {
       name,
       email,
       password: hashedPassword,
-      balance: 0,
-      count: 3
+      balance: 15000,
+      count: 3,
     });
 
     const { password: pw, ...userData } = user.toObject();
     res.status(200).json({ user: userData });
   } catch (err) {
-    res.status(500).json({ message: 'Lỗi server' });
+    console.error('Signup error:', err);
+    res.status(500).json({ message: 'Lỗi server', error: err.message });
   }
 };
 
@@ -41,7 +42,8 @@ exports.login = async (req, res) => {
     const { password: pw, ...userData } = user.toObject();
     res.status(200).json({ token, user: userData });
   } catch (err) {
-    res.status(500).json({ message: 'Lỗi server' });
+    console.error('Login error:', err);
+    res.status(500).json({ message: 'Lỗi server', error: err.message });
   }
 };
 
@@ -49,12 +51,25 @@ exports.getUserById = async (req, res) => {
   try {
     const { id } = req.params;
     const user = await User.findById(id).select('-password');
-
     if (!user) return res.status(404).json({ message: 'Không tìm thấy người dùng' });
 
     res.status(200).json({ user });
   } catch (err) {
-    res.status(500).json({ message: 'Lỗi server' });
+    console.error('getUserById error:', err);
+    res.status(500).json({ message: 'Lỗi server', error: err.message });
+  }
+};
+
+exports.getCurrentUser = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const user = await User.findById(userId).select('-password');
+    if (!user) return res.status(404).json({ message: 'Không tìm thấy người dùng' });
+
+    res.status(200).json(user);
+  } catch (err) {
+    console.error('getCurrentUser error:', err);
+    res.status(500).json({ message: 'Lỗi server', error: err.message });
   }
 };
 
@@ -70,7 +85,7 @@ exports.topup = async (req, res) => {
     const user = await User.findById(userId);
     if (!user) return res.status(404).json({ message: 'Không tìm thấy người dùng.' });
 
-    const addedCount = Math.floor(amount / 5);
+    const addedCount = Math.floor(amount / 5000);
     user.balance += amount;
     user.count += addedCount;
 
@@ -80,9 +95,35 @@ exports.topup = async (req, res) => {
       message: 'Nạp tiền thành công!',
       balance: user.balance,
       addedCount,
-      count: user.count
+      count: user.count,
     });
   } catch (err) {
+    console.error('Topup error:', err);
     res.status(500).json({ message: 'Lỗi khi nạp tiền.', error: err.message });
+  }
+};
+
+exports.useDesign = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ message: 'Không tìm thấy người dùng.' });
+
+    if (user.count <= 0) return res.status(400).json({ message: 'Bạn đã hết lượt thiết kế.' });
+    if (user.balance < 5000) return res.status(400).json({ message: 'Không đủ số dư (cần 5.000đ).' });
+
+    user.count -= 1;
+    user.balance -= 5000;
+    await user.save();
+
+    res.json({
+      message: 'Đã sử dụng lượt thiết kế thành công!',
+      count: user.count,
+      balance: user.balance,
+    });
+  } catch (err) {
+    console.error('useDesign error:', err);
+    res.status(500).json({ message: 'Lỗi server.', error: err.message });
   }
 };
