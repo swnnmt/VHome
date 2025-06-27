@@ -81,7 +81,7 @@ def call_chatbot_api(user_question, image_info=None, endpoint=None, api_key=None
 
 chatbot_answer = call_chatbot_api(
     user_question="Tôi nên bố trí nội thất thế nào căn phòng trong ảnh này?",
-    image_info="Sample2.jpg",  # file ảnh thật trên máy
+    image_info="https://noithathometime.com/wp-content/uploads/2019/12/ph%C3%B2ng-kh%C3%A1ch-2-1.jpg",  # file ảnh thật trên máy
     endpoint="https://api.openai.com/v1/chat/completions",
     api_key="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",          # key thực
     model_name="gpt-4o"
